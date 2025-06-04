@@ -1,0 +1,29 @@
+Header{
+    background-color: rgb(0, 87, 0);
+    color: white;
+
+    span:first-child{
+       margin-right: auto;
+    }
+
+    nav{
+        padding: 10px;
+        position: relative;
+        justify-content: center;
+        display: flex;
+        align-items: center;
+    }
+    ul{
+        display: flex;
+        list-style: none;
+    }
+    li{
+        padding: 0 20px ;
+    }
+    #toppy{
+        color: rgb(0, 174, 255);
+    }
+    #toppy:hover{
+        text-decoration: underline;
+    }
+}
