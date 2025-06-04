@@ -14,12 +14,11 @@ class User(Base):
         "Password", back_populates="user", cascade="all , delete-orphan"
     )
 
-
 class Password(Base):
     __tablename__ = "passwords"
-    id = Column(Integer, autoincrement=True, primary_key=True)
+    task_id = Column(Integer, autoincrement=True, primary_key=True)
     user_id = Column(Integer, ForeignKey("users.id"))
     title = Column(String, nullable=False)
-    login = Column(String, nullable=False)
+    desc = Column(String)
     passwd = Column(String, nullable=False)
     user = relationship("User", back_populates="poosey")

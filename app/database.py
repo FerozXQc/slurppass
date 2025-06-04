@@ -5,7 +5,8 @@ from email_validator import validate_email
 from models import Base, User, Password
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError, InvalidHashError
-
+from schemas import RegisterUserSchema, LoginUserSchema
+from fastapi import Response
 engine = create_engine("sqlite:///slurppass.db", echo=False)
 
 Session = sessionmaker(bind=engine)
@@ -13,10 +14,10 @@ session = Session()
 
 Base.metadata.create_all(engine)
 
-class HashArgon:
+class HashArgon:     #deals with the encryption and decryption
     ph = PasswordHasher(
         time_cost=3,
-        memory_cost=131072,  # 128 MB
+        memory_cost=131072,  # 128 MiB
         parallelism=4,
         hash_len=32,
         salt_len=16,
@@ -35,60 +36,61 @@ class HashArgon:
         except VerifyMismatchError:
             return False
 
-#utility functions
-def get_user_by_email(email):
-    return session.query(User).filter_by(email=email).first()
+class UtilityFunctions:    #handy utility functions...
 
+    @staticmethod
+    def get_user_by_email(email): 
+        return session.query(User).filter_by(email=email).first()
 
-def confirm_action(prompt: str) -> bool:
-    return input(f"{prompt} (yes/no): ").strip().lower() == "yes"
+    @staticmethod
+    def confirm_action(prompt: str) -> bool:
+        return input(f"{prompt} (yes/no): ").strip().lower() == "yes"
 
-
-def is_validEmail(email):
-    try:
-        valid = validate_email(email, check_deliverability=True)
-        return valid.normalized
-    except:
-        return None
+    @staticmethod
+    def is_validEmail(email):
+        try:
+            valid = validate_email(email, check_deliverability=True)
+            return valid.normalized
+        except:
+            return None
+    
 
 #crud
-def register():
-    name, email, password = (
-        input("enter name: "),
-        input("enter email: "),
-        input("enter password: "),
-    )
-    emailInfo = is_validEmail(email)
-    if emailInfo:
-        if get_user_by_email(emailInfo):
-            print(f"user already exists: {email}")
-            return
-        hashed_password = HashArgon.generate_hash(password)
-        print(hashed_password)
-        try:
-            session.add(User(name=name, email=email, password=hashed_password))
-            session.commit()
-            print("user added")
-
-        except IntegrityError:
-            session.rollback()
-            print("Error")
-
-    else:
-        print("email is not valid")
 
 
-def login():
-    email = input("Enter email: ")
-    password = input("Enter password: ")
+def db_createUser(name:str,email:str,hashed_password:str):
+    try:
+        session.add(User(name=name, email=email, password=hashed_password))
+        session.commit()
+        return f'User:{name} added successfully.'
 
-    user = get_user_by_email(email)
+    except IntegrityError as e:
+        session.rollback()
+        return f'error: {e}'
 
-    if not user:
-        print("No user found with that email!")
-        return
+def db_addPass(user_id:str,title:str,desc:str,passwd:str):
+    try:
+        session.add(Password(user_id=user_id,title=title,desc=desc,passwd=passwd))
+        session.commit()
+        return f'Password saved successfully.'
 
-    if HashArgon.verify_hash(user.password, password):
-        print("Logging in...")
-    else:
-        print("Invalid password!")
+    except IntegrityError as e:
+        session.rollback()
+        return f'error: {e}'
+
+def db_listPassLogs(user_id:str):
+    list = session.query(Password).filter_by(user_id=user_id).all()
+    return list
+
+def db_getPassLog(user_id:str,task_id:int):
+    passLog = session.query(Password).filter_by(task_id=task_id, user_id=user_id).first()
+    if type(passLog) is not Password:
+        return f'no passLog found with the id: #{task_id}'
+    return passLog
+
+def db_deletePassLog(user_id:str,task_id:int):
+    passLog = db_getPassLog(user_id,task_id)
+    session.delete(passLog)
+    session.commit()
+    return f'passLog with the the id: #{task_id} has been removed'
+
