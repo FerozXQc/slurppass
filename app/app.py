@@ -2,17 +2,20 @@ from fastapi import FastAPI
 import uvicorn
 from auth_routes import auth_router
 from fastapi.middleware.cors import CORSMiddleware
+from decouple import config
+from starlette.middleware.sessions import SessionMiddleware
 
-
+app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[config('REACT_URL')],
+    allow_origins=["http://localhost:5173"], 
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],)
 
+app.add_middleware(SessionMiddleware, secret_key="some-super-secret-key")
 
-app = FastAPI()
+
 app.include_router(auth_router, prefix="/auth")
 
 @app.get("/")

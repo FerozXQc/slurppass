@@ -7,7 +7,7 @@ Base = declarative_base()
 class User(Base):
     __tablename__ = "users"
     id = Column(Integer, autoincrement=True, primary_key=True)
-    name = Column(String, nullable=False)
+    name = Column(String, unique=True, nullable=False)
     email = Column(String, unique=True)
     password = Column(String, nullable=False)
     poosey = relationship(

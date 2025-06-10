@@ -7,4 +7,4 @@ class RegisterUserSchema(BaseModel):
 
 class LoginUserSchema(BaseModel):
     email: str
-    password: str
+    password: str   

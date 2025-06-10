@@ -47,13 +47,18 @@ class UtilityFunctions:    #handy utility functions...
         return input(f"{prompt} (yes/no): ").strip().lower() == "yes"
 
     @staticmethod
-    def is_validEmail(email):
+    def is_validEmail(email:str):
         try:
             valid = validate_email(email, check_deliverability=True)
             return valid.normalized
         except:
             return None
     
+    @staticmethod
+    def check_user_exists(name:str):
+        return session.query(User).filter_by(name=name).first()
+
+
 
 #crud
 

@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Form, Cookie, Response, HTTPException, Request
 from schemas import RegisterUserSchema, LoginUserSchema
 from database import db_createUser
-from redis_client import create_sessions, get_user_email, delete_session
+from redis_client import create_sessions, get_user_name, delete_session
 from decouple import config
 from database import UtilityFunctions, HashArgon
 
@@ -18,18 +18,26 @@ def registerUser(user: RegisterUserSchema):
     emailInfo = utility.is_validEmail(email)
     if emailInfo:
         if utility.get_user_by_email(emailInfo):
-            return {"result": f"user already exists: {email}"}
+            return {"result": f"email already exists: {email}",
+                    'loggable':False
+                    }
+
+        if utility.check_user_exists(name):
+            return {'result': f'username already exists: {name}','loggable':False}
+
         hashed_password = hashargon.generate_hash(password)
         print(hashed_password)  ##for debugging..
         result = db_createUser(name,email,hashed_password)
-        return {"result": result}
+        return {"result": result,
+        'loggable':True}
     else:
         return {"result": "email is not valid!!"}
 
+@auth_router.get('/me')
 def me(session_id: str = Cookie(None)):
     if not session_id:
         raise HTTPException(status_code=403, detail="login expired/unauthorized")
-    user_id = get_user_id(session_id)
+    user_id = get_user_name(session_id)
     if user_id:
         return {"user": user_id}
     raise HTTPException(status_code=403, detail="login expired/unauthorized")
@@ -40,15 +48,14 @@ def login(userSchema: LoginUserSchema, response: Response):
     user = utility.get_user_by_email(email)
     print(user) #debugging
     if not user:
-        print("No user found with that email!")
-        return
+        return {"message": "No user found with that email!", "status_code":403}
     isverified = hashargon.verify_hash(user.password, password) #verify_hash(hashed_password,password)
     if not isverified:
-        return "invalid password. Please try again."
+        return {"message":"invalid password. Please try again.", "status_code":403}
     else:
         session_id = create_sessions(user.name)
-        response.set_cookie(key="session_id", value=session_id, httponly=True)
-        return {"message": "login successful", "session_id": session_id}
+        response.set_cookie(key="session_id", value=session_id, httponly=True, max_age=86400)
+        return {"message": "login successful", "session_id": session_id, "user": user.name}
 
 
 @auth_router.post("/logout")
