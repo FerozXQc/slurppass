@@ -20,5 +20,5 @@ class Password(Base):
     user_id = Column(Integer, ForeignKey("users.id"))
     title = Column(String, nullable=False)
     desc = Column(String)
-    passwd = Column(String, nullable=False)
+    passlog = Column(String, nullable=False)
     user = relationship("User", back_populates="poosey")

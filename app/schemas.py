@@ -8,3 +8,9 @@ class RegisterUserSchema(BaseModel):
 class LoginUserSchema(BaseModel):
     email: str
     password: str   
+
+class AddPassLog(BaseModel):
+    user_id:str
+    title:str
+    desc:str
+    passlog:str

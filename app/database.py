@@ -73,9 +73,9 @@ def db_createUser(name:str,email:str,hashed_password:str):
         session.rollback()
         return f'error: {e}'
 
-def db_addPass(user_id:str,title:str,desc:str,passwd:str):
+def db_addPass(user_id:str,title:str,desc:str,passlog:str):
     try:
-        session.add(Password(user_id=user_id,title=title,desc=desc,passwd=passwd))
+        session.add(Password(user_id=user_id,title=title,desc=desc,passlog=passlog))
         session.commit()
         return f'Password saved successfully.'
 
