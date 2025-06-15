@@ -1,6 +1,7 @@
 import '../css/passlog.css'
 import { useEffect, useRef } from 'react'
 import api from '../api.js'
+import { useNavigate } from 'react-router-dom'
 export function Passlog({task_id,title,desc,passlog,delPassLog}){
 
     return <div className='passlog'>
@@ -16,19 +17,18 @@ export function PassForm({user, listupdate,setToggleForm}){
     const titleRef = useRef()
     const descRef = useRef()
     const passRef = useRef()
+    const nvg = useNavigate()
 
     const addPassLog = async() =>{
         const result = await api.post('/passlog/addPassLog', {user_id:user,title:titleRef.current.value,desc:descRef.current.value,passlog:passRef.current.value});
         console.log(result.data);
     }
 
-    const passSubmit = (e) =>{
+    const passSubmit = async(e) =>{
         e.preventDefault();
-        addPassLog()
+        await addPassLog()
         listupdate()
-        setToggleForm(false)
-
-        
+        setToggleForm(false) 
     }
 
     return <form onSubmit={passSubmit}>

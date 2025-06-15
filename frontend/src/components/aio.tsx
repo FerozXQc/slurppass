@@ -17,9 +17,7 @@ export const Header = ({ user, setUser }) => {
       <nav>
         <span>Slurppass.</span>
         {user == null ? (
-          <a id="toppy" href="/login">
-            Sign up/Log in
-          </a>
+          null
         ) : (
           <p>
             welcome {user},{" "}
