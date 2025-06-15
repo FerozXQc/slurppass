@@ -42,12 +42,13 @@ const listPasslogs = async()=>{
 
 const delPasslog = async(key)=>{
   try {
-    const result = await api.delete('/passlog/deletePassLog',{
+    await api.delete('/passlog/deletePassLog',{
       params: {
         user_id:user,
         task_id:key
       }
     })
+    listPasslogs()
 
   } catch (error) {
     console.error(error)
@@ -66,7 +67,7 @@ const delPasslog = async(key)=>{
     else{
       setLogs([])
     }
-  },[user,delPasslog])
+  },[user])
 
   return (
     <>
